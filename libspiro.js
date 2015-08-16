@@ -561,7 +561,10 @@ function spiro_to_bpath(s, n, bc) {
 		var y0 = s[i].y;
 		var x1 = s[i + 1].x;
 		var y1 = s[i + 1].y;
-		if (i === 0) bc.moveTo(x0, y0);
+		if (i === 0) {
+			bc.moveTo(x0, y0);
+			if(s[0].af) s[0].af.call(bc, x0, y0);
+		}
 		spiro_seg_to_bpath(s[i].ks, x0, y0, x1, y1, bc, 0, s[i + 1].af);
 	}
 }
