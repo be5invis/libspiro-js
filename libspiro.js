@@ -495,7 +495,7 @@ function spiro_seg_to_bpath(ks, x0, y0, x1, y1, bc, depth, subdivided, af) {
 	var bend = Math.abs(ks[0]) + Math.abs(.5 * ks[1]) + Math.abs(.125 * ks[2]) + Math.abs((1. / 48) * ks[3]);
 
 	if (bend <= 1e-8) {
-		bc.lineTo(x1, y1);
+		bc.lineTo(x1, y1, subdivided);
 	} else {
 		var seg_ch = Math.hypot(x1 - x0, y1 - y0);
 		var seg_th = Math.atan2(y1 - y0, x1 - x0);
