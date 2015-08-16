@@ -491,7 +491,7 @@ function solve_spiro(s, nseg) {
 	return 0;
 }
 
-function spiro_seg_to_bpath(ks, x0, y0, x1, y1, bc, depth, hard, af) {
+function spiro_seg_to_bpath(ks, x0, y0, x1, y1, bc, depth, subdivided, af) {
 	var bend = Math.abs(ks[0]) + Math.abs(.5 * ks[1]) + Math.abs(.125 * ks[2]) + Math.abs((1. / 48) * ks[3]);
 
 	if (bend <= 1e-8) {
@@ -518,7 +518,7 @@ function spiro_seg_to_bpath(ks, x0, y0, x1, y1, bc, depth, hard, af) {
 			vl = (scale * (1. / 3)) * Math.sin(th_even - th_odd);
 			ur = (scale * (1. / 3)) * Math.cos(th_even + th_odd);
 			vr = (scale * (1. / 3)) * Math.sin(th_even + th_odd);
-			bc.cubicTo(x0 + ul, y0 + vl, x1 - ur, y1 - vr, x1, y1, hard);
+			bc.cubicTo(x0 + ul, y0 + vl, x1 - ur, y1 - vr, x1, y1, subdivided);
 		} else {
 			/* subdivide */
 			var ksub = [];
@@ -537,11 +537,11 @@ function spiro_seg_to_bpath(ks, x0, y0, x1, y1, bc, depth, hard, af) {
 			integrate_spiro(ksub, xysub);
 			xmid = x0 + cth * xysub[0] - sth * xysub[1];
 			ymid = y0 + cth * xysub[1] + sth * xysub[0];
-			spiro_seg_to_bpath(ksub, x0, y0, xmid, ymid, bc, depth + 1, false);
+			spiro_seg_to_bpath(ksub, x0, y0, xmid, ymid, bc, depth + 1, true);
 			ksub[0] += .25 * ks[1] + (1. / 384) * ks[3];
 			ksub[1] += .125 * ks[2];
 			ksub[2] += (1. / 16) * ks[3];
-			spiro_seg_to_bpath(ksub, xmid, ymid, x1, y1, bc, depth + 1, true);
+			spiro_seg_to_bpath(ksub, xmid, ymid, x1, y1, bc, depth + 1, subdivided);
 		}
 	};
 	if (af) {
@@ -567,7 +567,7 @@ function spiro_to_bpath(s, n, bc) {
 			bc.moveTo(x0, y0);
 			if(s[0].af) s[0].af.call(bc, x0, y0);
 		}
-		spiro_seg_to_bpath(s[i].ks, x0, y0, x1, y1, bc, 0, true, s[i + 1].af);
+		spiro_seg_to_bpath(s[i].ks, x0, y0, x1, y1, bc, 0, false, s[i + 1].af);
 	}
 }
 
