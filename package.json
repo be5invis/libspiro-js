@@ -1,7 +1,7 @@
 {
   "name": "libspiro-js",
 
-  "version": "0.1.1",
+  "version": "0.1.2",
 
   "description": "JavaScript libspiro port",
   "keywords": ["bezier", "curve", "spiro", "libspiro", "nurbs"],
