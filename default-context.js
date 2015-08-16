@@ -21,7 +21,7 @@ DefaultBezierContext.prototype.cubicTo = function(x1, y1, x2, y2, x, y) {
 		order: 3,
 		start: {x: this.lastx, y: this.lasty},
 		c1: {x: x1, y: y1},
-		c2: {x: x2 y: y2},
+		c2: {x: x2, y: y2},
 		end: {x: x, y: y}
 	});
 	this.lastx = x;
