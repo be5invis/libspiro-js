@@ -537,7 +537,7 @@ function spiro_seg_to_bpath(ks, x0, y0, x1, y1, bc, depth, hard, af) {
 			integrate_spiro(ksub, xysub);
 			xmid = x0 + cth * xysub[0] - sth * xysub[1];
 			ymid = y0 + cth * xysub[1] + sth * xysub[0];
-			spiro_seg_to_bpath(ksub, x0, y0, xmid, ymid, bc, depth + 1, true);
+			spiro_seg_to_bpath(ksub, x0, y0, xmid, ymid, bc, depth + 1, false);
 			ksub[0] += .25 * ks[1] + (1. / 384) * ks[3];
 			ksub[1] += .125 * ks[2];
 			ksub[2] += (1. / 16) * ks[3];
@@ -567,7 +567,7 @@ function spiro_to_bpath(s, n, bc) {
 			bc.moveTo(x0, y0);
 			if(s[0].af) s[0].af.call(bc, x0, y0);
 		}
-		spiro_seg_to_bpath(s[i].ks, x0, y0, x1, y1, bc, 0, s[i + 1].af, true);
+		spiro_seg_to_bpath(s[i].ks, x0, y0, x1, y1, bc, 0, true, s[i + 1].af);
 	}
 }
 
