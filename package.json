@@ -1,0 +1,29 @@
+{
+  "name": "libspiro-js",
+
+  "version": "0.1.0",
+
+  "description": "JavaScript libspiro port",
+  "keywords": ["bezier", "curve", "spiro", "libspiro", "nurbs"],
+  "homepage": "https://github.com/be5invis/libspiro-js",
+  "author": {
+    "name": "Belleve Invis",
+    "email": "belleve@typeof.net"
+  },
+  "bugs": {
+    "url": "https://github.com/be5invis/libspiro-js/issues"
+  },
+  "licenses": [
+    {
+      "type": "GPLv3",
+      "url": "https://github.com/be5invis/libspiro-js/raw/master/LICENSE"
+    }
+  ],
+
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/be5invis/libspiro-js.git"
+  },
+
+  "main": "./libspiro"
+}
