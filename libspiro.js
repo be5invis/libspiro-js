@@ -490,7 +490,29 @@ function solve_spiro(s, nseg) {
 	}
 	return 0;
 }
+function findIntersection(p1, c1, c2, p2){
+	var d1 = {x : c1.x - p1.x, y: c1.y - p1.y}
+	var d2 = {x : c2.x - p2.x, y: c2.y - p2.y}
+	
+	var det = d2.x * d1.y - d2.y * d1.x;
+	if(Math.abs(det) < 1e-6) return null;
+	var u = ((p2.y - p1.y) * d2.x - (p2.x - p1.x) * d2.y) / det
+	var v = ((p2.y - p1.y) * d1.x - (p2.x - p1.x) * d1.y) / det
+	if(u <= 0 || v <= 0) return null;
+	return {
+		x: p1.x + d1.x * u,
+		y: p1.y + d1.y * u
+	}
+}
 
+function findquad(p1, c1, c2, p2) {
+	var pt = findIntersection(p1, c1, c2, p2);
+	if(!pt) pt = {
+		x : (p1.x + p2.x) / 2,
+		y : (p1.y + p2.y) / 2
+	}
+	return pt
+}
 function spiro_seg_to_bpath(ks, x0, y0, x1, y1, bc, depth, subdivided, isquad, af) {
 	var bend = Math.abs(ks[0]) + Math.abs(.5 * ks[1]) + Math.abs(.125 * ks[2]) + Math.abs((1. / 48) * ks[3]);
 
@@ -511,8 +533,7 @@ function spiro_seg_to_bpath(ks, x0, y0, x1, y1, bc, depth, subdivided, isquad, a
 		th = Math.atan2(xy[1], xy[0]);
 		scale = seg_ch / ch;
 		rot = seg_th - th;
-		if (depth > MAX_DEPTH || bend < (isquad ? 0.5 : 1.0)) {
-			// Should we use quadratic curves here?
+		if (depth > MAX_DEPTH || bend < (isquad ? 0.75 : 1.0)) {
 			th_even = (1. / 384) * ks[3] + (1. / 8) * ks[1] + rot;
 			th_odd = (1. / 48) * ks[2] + .5 * ks[0];
 			ul = (scale * (1. / 3)) * Math.cos(th_even - th_odd);
@@ -520,9 +541,8 @@ function spiro_seg_to_bpath(ks, x0, y0, x1, y1, bc, depth, subdivided, isquad, a
 			ur = (scale * (1. / 3)) * Math.cos(th_even + th_odd);
 			vr = (scale * (1. / 3)) * Math.sin(th_even + th_odd);
 			if(isquad){
-				var cx = (3 * (x1 - ur) - x1 + 3 * (x0 + ul) - x0) / 4
-				var cy = (3 * (y1 - vr) - y1 + 3 * (y0 + vl) - y0) / 4
-				bc.curveTo(cx, cy, x1, y1, subdivided);
+				var pt = findquad({x : x0, y : y0}, {x : x0 + ul, y : y0 + vl}, {x : x1 - ur, y : y1 - vr}, {x: x1, y: y1});
+				bc.curveTo(pt.x, pt.y, x1, y1, subdivided);
 			} else {
 				bc.cubicTo(x0 + ul, y0 + vl, x1 - ur, y1 - vr, x1, y1, subdivided);
 			}
