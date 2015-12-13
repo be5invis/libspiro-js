@@ -1,7 +1,7 @@
 var DefaultBezierContext = require('./default-context').DefaultBezierContext;
 
 var N = 4;
-var MAX_DEPTH = 5;
+var MAX_DEPTH = 7;
 
 function arraycopy(src, j, dst, jd, n) {
 	for (var k = 0; k < n; k++) {
@@ -510,9 +510,7 @@ function toquad2(x0, y0, x1, y1, x2, y2, x3, y3, bc, subdivided){
 	var sy = y0 + 3 / 4 * (y1 - y0)
 	var fx = x3 + 3 / 4 * (x2 - x3)
 	var fy = y3 + 3 / 4 * (y2 - y3)
-	bc.curveTo(sx, sy, (sx + fx) / 2, (sy + fy) / 2, subdivided)
-	//bc.curveTo(p, q, (r + p) / 2, (s + q) / 2, subdivided)
-	//bc.curveTo(r, s, (r + fx) / 2, (s + fy) / 2, subdivided)
+	bc.curveTo(sx, sy, (sx + fx) / 2, (sy + fy) / 2, true)
 	bc.curveTo(fx, fy, x3, y3, subdivided)
 }
 function toquad4(x0, y0, x1, y1, x2, y2, x3, y3, bc, subdivided){
@@ -525,12 +523,12 @@ function toquad4(x0, y0, x1, y1, x2, y2, x3, y3, bc, subdivided){
 	var s = 1/32 * (y0 + 9 * y1 + 15 * y2 + 7 * y3)
 	var fx = x3 + 3 / 8 * (x2 - x3)
 	var fy = y3 + 3 / 8 * (y2 - y3)
-	bc.curveTo(sx, sy, (sx + p) / 2, (sy + q) / 2, subdivided)
-	bc.curveTo(p, q, (r + p) / 2, (s + q) / 2, subdivided)
-	bc.curveTo(r, s, (r + fx) / 2, (s + fy) / 2, subdivided)
+	bc.curveTo(sx, sy, (sx + p) / 2, (sy + q) / 2, true)
+	bc.curveTo(p, q, (r + p) / 2, (s + q) / 2, true)
+	bc.curveTo(r, s, (r + fx) / 2, (s + fy) / 2, true)
 	bc.curveTo(fx, fy, x3, y3, subdivided)
 }
-function spiro_seg_to_bpath(ks, x0, y0, x1, y1, bc, depth, subdivided, isquad, af) {
+function spiro_seg_to_bpath(ks, x0, y0, x1, y1, bc, depth, subdivided, isquad, af, delta) {
 	var bend = Math.abs(ks[0]) + Math.abs(.5 * ks[1]) + Math.abs(.125 * ks[2]) + Math.abs((1. / 48) * ks[3]);
 
 	if (bend <= 1e-8) {
@@ -550,7 +548,7 @@ function spiro_seg_to_bpath(ks, x0, y0, x1, y1, bc, depth, subdivided, isquad, a
 		th = Math.atan2(xy[1], xy[0]);
 		scale = seg_ch / ch;
 		rot = seg_th - th;
-		if (depth > MAX_DEPTH || bend < 1) {
+		if (depth > MAX_DEPTH || bend < (delta || 1)) {
 			th_even = (1. / 384) * ks[3] + (1. / 8) * ks[1] + rot;
 			th_odd = (1. / 48) * ks[2] + .5 * ks[0];
 			ul = (scale * (1. / 3)) * Math.cos(th_even - th_odd);
@@ -558,7 +556,7 @@ function spiro_seg_to_bpath(ks, x0, y0, x1, y1, bc, depth, subdivided, isquad, a
 			ur = (scale * (1. / 3)) * Math.cos(th_even + th_odd);
 			vr = (scale * (1. / 3)) * Math.sin(th_even + th_odd);
 			if(isquad){
-				if(bend > 0.5){
+				if(bend > 0.5 * (delta || 1)){
 					toquad2(x0, y0, x0 + ul, y0 + vl, x1 - ur, y1 - vr, x1, y1, bc);
 				} else {
 					var pt = findIntersection({x : x0, y : y0}, {x : x0 + ul, y : y0 + vl}, {x : x1 - ur, y : y1 - vr}, {x: x1, y: y1});
@@ -608,7 +606,7 @@ function run_spiro(src, n) {
 	return s;
 }
 
-function spiro_to_bpath(s, n, bc, isquad) {
+function spiro_to_bpath(s, n, bc, isquad, delta) {
 	var nsegs = s[n - 1].type === 'open_end' ? n - 1 : n;
 	for (var i = 0; i < nsegs; i++) {
 		var x0 = s[i].x;
@@ -619,11 +617,11 @@ function spiro_to_bpath(s, n, bc, isquad) {
 			bc.moveTo(x0, y0);
 			if(s[0].af) s[0].af.call(bc, x0, y0);
 		}
-		spiro_seg_to_bpath(s[i].ks, x0, y0, x1, y1, bc, 0, false, isquad, s[i + 1].af);
+		spiro_seg_to_bpath(s[i].ks, x0, y0, x1, y1, bc, 0, false, isquad, s[i + 1].af, delta);
 	}
 }
 
-function spiroToBezierOnContext(spiros, isClosed, bc, isquad) {
+function spiroToBezierOnContext(spiros, isClosed, bc, isquad, delta) {
 	var s;
 	var n = spiros.length;
 	if (n < 1) return;
@@ -638,7 +636,7 @@ function spiroToBezierOnContext(spiros, isClosed, bc, isquad) {
 	} else {
 		s = run_spiro(spiros, n);
 	}
-	spiro_to_bpath(s, n, bc, isquad);
+	spiro_to_bpath(s, n, bc, isquad, delta);
 }
 function spiroToBezier(spiros, isClosed){
 	var c = new DefaultBezierContext();
