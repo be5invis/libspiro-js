@@ -587,11 +587,11 @@ function spiro_seg_to_bpath(ks, x0, y0, x1, y1, bc, depth, subdivided, isquad, a
 			integrate_spiro(ksub, xysub);
 			xmid = x0 + cth * xysub[0] - sth * xysub[1];
 			ymid = y0 + cth * xysub[1] + sth * xysub[0];
-			spiro_seg_to_bpath(ksub, x0, y0, xmid, ymid, bc, depth + 1, true, isquad);
+			spiro_seg_to_bpath(ksub, x0, y0, xmid, ymid, bc, depth + 1, true, isquad, undefined, delta);
 			ksub[0] += .25 * ks[1] + (1. / 384) * ks[3];
 			ksub[1] += .125 * ks[2];
 			ksub[2] += (1. / 16) * ks[3];
-			spiro_seg_to_bpath(ksub, xmid, ymid, x1, y1, bc, depth + 1, subdivided, isquad);
+			spiro_seg_to_bpath(ksub, xmid, ymid, x1, y1, bc, depth + 1, subdivided, isquad, undefined, delta);
 		}
 	};
 	if (af) {
